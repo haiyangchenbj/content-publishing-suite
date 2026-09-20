@@ -82,8 +82,56 @@ def first_heading(md):
 
 
 def parse_table_row(line):
-    cells = [c.strip() for c in line.strip().strip("|").split("|")]
-    return cells
+    return [c.strip() for c in line.strip().strip("|").split("|")]
+
+
+def is_table_delimiter(line):
+    cells = parse_table_row(line)
+    return bool(cells) and all(re.fullmatch(r":?-{3,}:?", cell.replace(" ", "")) for cell in cells)
+
+
+def collect_table(lines, start):
+    rows = [parse_table_row(lines[start])]
+    end = start + 1
+    while end < len(lines):
+        candidate = lines[end].strip()
+        if not (candidate.startswith("|") and candidate.count("|") >= 2):
+            break
+        if not is_table_delimiter(candidate):
+            rows.append(parse_table_row(candidate))
+        end += 1
+    return rows, end
+
+
+def md_table_to_wechat(rows):
+    if not rows:
+        return ""
+    header = rows[0]
+    if header[:3] == ["层", "主要责任", "失败时暴露的问题"]:
+        return ('<section style="padding:0;">'
+                '<img src="query-responsibility-table.png" alt="" style="display:block;width:100%;height:auto;margin:1.5em 0;">'
+                '</section>')
+    blocks = []
+    header_labels = ["层", "主要责任", "失败时暴露的问题"]
+    for row in rows[1:]:
+        cells = (row + [""] * len(header))[:len(header)]
+        layer = cells[0]
+        label_style = 'font-size:14px;line-height:1.7;color:#a87b35;font-weight:700;letter-spacing:1px;'
+        layer_style = 'color:#1a3a5c;font-weight:700;letter-spacing:1px;'
+        if len(cells) >= 3:
+            responsibility, failure = cells[1], cells[2]
+            detail = (
+                '<p style="%s"><span style="%s">%s</span> %s</p>'
+                '<p style="%s"><span style="%s">%s</span> %s</p>'
+            ) % (PARAGRAPH_STYLE, label_style, header_labels[1], inline(responsibility), PARAGRAPH_STYLE, label_style, header_labels[2], inline(failure))
+        else:
+            detail = '<p style="%s"><span style="%s">%s</span> %s</p>' % (PARAGRAPH_STYLE, label_style, inline(header[1] if len(header) > 1 else "说明"), inline(cells[1]))
+        blocks.append(
+            '<section style="padding:0 0 0 14px;margin:1.6em 0;border-top:1px solid #d9e0e8;border-left:3px solid #a87b35;">'
+            '<p style="%s"><span style="%s">%s</span></p>%s</section>'
+            % (PARAGRAPH_STYLE, layer_style, inline(layer), detail)
+        )
+    return "".join(blocks)
 
 
 def md_to_wechat(md, title, author, date, summary=""):
@@ -94,11 +142,15 @@ def md_to_wechat(md, title, author, date, summary=""):
         out.append('<section style="padding:0;">'
                    '<blockquote style="%s">'
                    '<p style="%s"><strong style="%s">摘要</strong>：%s</p></blockquote></section>' % (SUMMARY_BLOCKQUOTE_STYLE, SUMMARY_P_STYLE, STRONG_STYLE, inline(summary)))
-    for line in md.splitlines():
-        s = line.strip()
+    lines = md.splitlines()
+    i = 0
+    while i < len(lines):
+        s = lines[i].strip()
         if not s:
+            i += 1
             continue
         if s.startswith("# "):
+            i += 1
             continue
         if s.startswith("## ") or s.startswith("### "):
             h = inline(s.lstrip("# ").strip())
@@ -112,18 +164,29 @@ def md_to_wechat(md, title, author, date, summary=""):
             out.append('<section style="padding:0;">'
                        '<p style="%s"><span style="color:%s;margin-right:6px;">•</span>%s</p></section>' % (PARAGRAPH_STYLE, INK, inline(s[2:])))
         elif "|" in s and s.count("|") >= 2 and re.match(r"^\|", s):
-            cells = parse_table_row(s)
-            table_html = ('<section style="%s">'
-                          '<table style="width:100%%;border-collapse:collapse;%s">'
-                          '<thead><tr style="background:%s;color:#fff;">%s</tr></thead></table></section>') % (
-                              TABLE_SECTION_STYLE, TABLE_STYLE, INK,
-                              "".join('<th style="padding:8px 10px;text-align:left;border:1px solid %s;">%s</th>' % (INK, inline(c)) for c in cells))
-            out.append(table_html)
+            rows, i = collect_table(lines, i)
+            out.append(md_table_to_wechat(rows))
+            continue
         else:
             out.append('<section style="padding:0;">'
                        '<p style="%s">%s</p></section>' % (PARAGRAPH_STYLE, inline(s)))
+        i += 1
     out.append('<v2></v2>')
     return "".join(out)
+
+
+def md_table_to_standalone(rows):
+    if not rows:
+        return ""
+    header = rows[0]
+    if header[:3] == ["层", "主要责任", "失败时暴露的问题"]:
+        return '<figure style="margin:20px 0;"><img src="query-responsibility-table.png" alt="" style="display:block;width:100%;height:auto;"></figure>'
+    head_html = "".join("<th>%s</th>" % inline(cell) for cell in header)
+    body_html = []
+    for row in rows[1:]:
+        cells = (row + [""] * len(header))[:len(header)]
+        body_html.append("<tr>%s</tr>" % "".join("<td>%s</td>" % inline(cell) for cell in cells))
+    return "<table><thead><tr>%s</tr></thead><tbody>%s</tbody></table>" % (head_html, "".join(body_html))
 
 
 def md_to_standalone(md, title, author, date, core):
@@ -131,12 +194,14 @@ def md_to_standalone(md, title, author, date, core):
     body = []
     toc = []
     idx = 0
-    in_table = False
-    for line in lines:
-        s = line.strip()
+    i = 0
+    while i < len(lines):
+        s = lines[i].strip()
         if not s:
+            i += 1
             continue
         if s.startswith("# "):
+            i += 1
             continue
         if s.startswith("## ") or s.startswith("### "):
             idx += 1
@@ -149,10 +214,12 @@ def md_to_standalone(md, title, author, date, core):
         elif s.startswith("- "):
             body.append('<p><span style="color:%s;margin-right:6px;">•</span>%s</p>' % (INK, inline(s[2:])))
         elif "|" in s and s.count("|") >= 2 and re.match(r"^\|", s):
-            cells = parse_table_row(s)
-            body.append('<table><thead><tr>%s</tr></thead></table>' % "".join("<th>%s</th>" % inline(c) for c in cells))
+            rows, i = collect_table(lines, i)
+            body.append(md_table_to_standalone(rows))
+            continue
         else:
             body.append("<p>%s</p>" % inline(s))
+        i += 1
     toc_html = '<nav class="toc" id="toc"><h2>目录</h2>%s</nav>' % "".join(toc) if toc else ""
     css = """:root{--ink:{INK};--text:{TEXT};--muted:#777;--line:#e6e9ef;}
 *{box-sizing:border-box;}body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);background:#fafbfc;line-height:1.8;}

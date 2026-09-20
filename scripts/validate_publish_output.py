@@ -109,7 +109,7 @@ def read_image_size(path):
     """读取 PNG/JPEG 尺寸，不依赖第三方图像库。"""
     with open(path, "rb") as f:
         head = f.read(32)
-        if head.startswith(b"\\x89PNG\\r\\n\\x1a\\n") and len(head) >= 24:
+        if head.startswith(b"\x89PNG\r\n\x1a\n") and len(head) >= 24:
             w = int.from_bytes(head[16:20], "big")
             h = int.from_bytes(head[20:24], "big")
             return w, h

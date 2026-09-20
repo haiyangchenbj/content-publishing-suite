@@ -114,6 +114,8 @@ def main():
     for index, match in enumerate(p_matches, 1):
         tag = "<p%s>" % match.group(1)
         styles = style_of(tag)
+        if "text-align" in styles:
+            failures.append("正文 p[%d] 禁止设置 text-align；仅 h1 标题允许居中" % index)
         size = styles.get("font-size")
         if size == norm(contract["paragraph"]["font_size"]):
             check_style(styles, contract["paragraph"], "正文 p[%d]" % index, failures)
