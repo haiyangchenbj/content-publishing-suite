@@ -2,7 +2,7 @@
 name: content-publishing-suite
 slug: content-publishing-suite-skill
 displayName: Content Publishing Suite
-version: "1.1.13"
+version: "1.1.14""
 description: This skill should be used when a fact-checked and compliance-approved final Markdown draft needs to be turned into multi-channel publishing assets — WeChat article (135-editor-compatible inline HTML), WeChat image-summary card (公众号发图/摘要图/图文卡/810×1080), LinkedIn post, standalone responsive HTML page, and an archive ledger (local record plus optional Notion entry). It only orchestrates publishing and format conversion; it does not repeat fact-checking and does not auto-publish. Can optionally pair with a dedicated WeChat-layout skill if one is installed. Trigger keywords: 发布物料, 排版并入库, 多平台发布, 定稿发到微信, 公众号发图, 摘要图, 图文卡, 810×1080, publishing suite, multi-channel publish, final draft to WeChat/LinkedIn, package for publishing.
 description_zh: 内容发布套件
 description_en: Content publishing suite
@@ -128,6 +128,7 @@ python3 {SKILL_DIR}/scripts/build_publish_package.py \
 5. 任何外部动作（推送、建草稿、写 Notion）默认 `--dry-run`，必须先列目标并取得用户确认；写后必须回读核验。
 6. 凭据只走环境变量（Notion 用 `NOTION_TOKEN`、库 ID 用 `NOTION_DB_ID`；文章管理平台经既有 MCP/连接器），绝不硬编码。
 7. 微信发图摘要卡必须为 810×1080（3:4），且图与文案都围绕同一篇已审核长文；图中不重复添加公众号账号水印。台账需记录 `summary_card` 路径。
+8. 跨渠道数字一致性：同一篇长文衍生的多渠道物料（微信 / Notion / 平台版）发布前必须做关键数字与案例名的跨文件比对，不一致一律退回上游，不得带歧义发布。
 8. 一旦交付包含微信发图摘要，必须先完整加载 `tech-writing-pipeline` 并逐项执行其 6.1；未加载或无法访问时，停止摘要卡制作并说明缺少的规范，不能凭本 skill 的简写规则自行补全。
 9. 脚本只读取用户指定的定稿、写入用户指定的输出目录；不引入网络外送。
 10. 发布套件 ready 的前置条件包含封面 brief、封面 prompt、最终 2.35:1 长文封面、摘要卡 A 区视觉依赖、摘要卡文章级内容契约、摘要卡 6.1 范围门禁和 baseline 逐字段门禁；基础渠道格式脚本通过不能替代这些视觉、内容与流程门禁。
