@@ -2,7 +2,7 @@
 name: content-publishing-suite
 slug: content-publishing-suite-skill
 displayName: Content Publishing Suite
-version: "1.1.14""
+version: "1.1.15"
 description: This skill should be used when a fact-checked and compliance-approved final Markdown draft needs to be turned into multi-channel publishing assets — WeChat article (135-editor-compatible inline HTML), WeChat image-summary card (公众号发图/摘要图/图文卡/810×1080), LinkedIn post, standalone responsive HTML page, and an archive ledger (local record plus optional Notion entry). It only orchestrates publishing and format conversion; it does not repeat fact-checking and does not auto-publish. Can optionally pair with a dedicated WeChat-layout skill if one is installed. Trigger keywords: 发布物料, 排版并入库, 多平台发布, 定稿发到微信, 公众号发图, 摘要图, 图文卡, 810×1080, publishing suite, multi-channel publish, final draft to WeChat/LinkedIn, package for publishing.
 description_zh: 内容发布套件
 description_en: Content publishing suite
@@ -129,12 +129,12 @@ python3 {SKILL_DIR}/scripts/build_publish_package.py \
 6. 凭据只走环境变量（Notion 用 `NOTION_TOKEN`、库 ID 用 `NOTION_DB_ID`；文章管理平台经既有 MCP/连接器），绝不硬编码。
 7. 微信发图摘要卡必须为 810×1080（3:4），且图与文案都围绕同一篇已审核长文；图中不重复添加公众号账号水印。台账需记录 `summary_card` 路径。
 8. 跨渠道数字一致性：同一篇长文衍生的多渠道物料（微信 / Notion / 平台版）发布前必须做关键数字与案例名的跨文件比对，不一致一律退回上游，不得带歧义发布。
-8. 一旦交付包含微信发图摘要，必须先完整加载 `tech-writing-pipeline` 并逐项执行其 6.1；未加载或无法访问时，停止摘要卡制作并说明缺少的规范，不能凭本 skill 的简写规则自行补全。
-9. 脚本只读取用户指定的定稿、写入用户指定的输出目录；不引入网络外送。
-10. 发布套件 ready 的前置条件包含封面 brief、封面 prompt、最终 2.35:1 长文封面、摘要卡 A 区视觉依赖、摘要卡文章级内容契约、摘要卡 6.1 范围门禁和 baseline 逐字段门禁；基础渠道格式脚本通过不能替代这些视觉、内容与流程门禁。
-11. 微信排版和摘要卡都必须使用确定性校验器：排版校验字号/行高/颜色/间距/背景/结构；摘要卡校验 A/B/C/D 文本、A 区素材、背景、位置和配文锚点。只有自然语言复核没有脚本结果时，不得标记 ready。
-12. 英文渠道物料必须继承英文正文的 claim map、作者性门禁和事实边界；不得绕过英文正文直接从中文定稿生成英文 caption、摘要或社媒文案。
-13. 微信长文摘要必须单独执行长度与功能门禁：不得超过 120 字符，通常控制在 30 字符以内；摘要要与标题互补，承担正文引子或实质结论之一，不得使用摘要卡长配文或正文首段替代。
+9. 一旦交付包含微信发图摘要，必须先完整加载 `tech-writing-pipeline` 并逐项执行其 6.1；未加载或无法访问时，停止摘要卡制作并说明缺少的规范，不能凭本 skill 的简写规则自行补全。
+10. 脚本只读取用户指定的定稿、写入用户指定的输出目录；不引入网络外送。
+11. 发布套件 ready 的前置条件包含封面 brief、封面 prompt、最终 2.35:1 长文封面、摘要卡 A 区视觉依赖、摘要卡文章级内容契约、摘要卡 6.1 范围门禁和 baseline 逐字段门禁；基础渠道格式脚本通过不能替代这些视觉、内容与流程门禁。
+12. 微信排版和摘要卡都必须使用确定性校验器：排版校验字号/行高/颜色/间距/背景/结构；摘要卡校验 A/B/C/D 文本、A 区素材、背景、位置和配文锚点。只有自然语言复核没有脚本结果时，不得标记 ready。
+13. 英文渠道物料必须继承英文正文的 claim map、作者性门禁和事实边界；不得绕过英文正文直接从中文定稿生成英文 caption、摘要或社媒文案。
+14. 微信长文摘要必须单独执行长度与功能门禁：不得超过 120 字符，通常控制在 30 字符以内；摘要要与标题互补，承担正文引子或实质结论之一，不得使用摘要卡长配文或正文首段替代。
 
 ## Failure Handling
 
