@@ -2,7 +2,7 @@
 name: content-publishing-suite
 slug: content-publishing-suite-skill
 displayName: Content Publishing Suite
-version: "1.1.15"
+version: "1.1.16"
 description: This skill should be used when a fact-checked and compliance-approved final Markdown draft needs to be turned into multi-channel publishing assets — WeChat article (135-editor-compatible inline HTML), WeChat image-summary card (公众号发图/摘要图/图文卡/810×1080), LinkedIn post, standalone responsive HTML page, and an archive ledger (local record plus optional Notion entry). It only orchestrates publishing and format conversion; it does not repeat fact-checking and does not auto-publish. Can optionally pair with a dedicated WeChat-layout skill if one is installed. Trigger keywords: 发布物料, 排版并入库, 多平台发布, 定稿发到微信, 公众号发图, 摘要图, 图文卡, 810×1080, publishing suite, multi-channel publish, final draft to WeChat/LinkedIn, package for publishing.
 description_zh: 内容发布套件
 description_en: Content publishing suite
@@ -155,6 +155,7 @@ python3 {SKILL_DIR}/scripts/build_publish_package.py \
 ├── wechat_preview.html
 ├── summary-card-contract.json
 ├── wechat_summary_card.jpg
+├── wechat_summary_card.html   # 6.1 视觉链路门禁所需的卡片 HTML
 ├── wechat_summary_copy.md
 # 项目根目录同步：篇名-排版-日期.html + 篇名-排版-日期_snippet.html
 ├── linkedin-post.md
